@@ -111,8 +111,8 @@ def main():
     red_line, = ax1.plot(avereward_Red, label='Red', color='red')
 
     # Adding labels and title
-    ax1.set_xlabel('Index')
-    ax1.set_ylabel('Value')
+    ax1.set_xlabel('Run numper per treatment')
+    ax1.set_ylabel('Avarage Reward Value per treatment')
     ax1.set_title('Line Graph with Index as X-axis')
 
     ax1.legend(loc='upper right')
