@@ -1,0 +1,11 @@
+Implement an MAB algorithm for the medical trial situation:
+  Three different treatments, each with uncertain
+  performance, defined as the welfare of a patient after
+  the treatment.
+
+  Help the doctor to prescribe a treatment at one time.
+  
+  Display how the estimated value of each treatment
+  evolves with time.
+  
+  Display how the average reward you have obtained evolves.
