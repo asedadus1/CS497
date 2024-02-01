@@ -43,7 +43,7 @@ def main():
 
     QBlue, QGreen, QRed = 0.0, 0.0, 0.0
     NBlue, NGreen, NRed = 0, 0, 0
-    e = 0.9  # epsilon default value
+    e = 0.01  # epsilon default value
 
     for loop_num in range(100):
         val = -1
