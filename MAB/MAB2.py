@@ -24,9 +24,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import CheckButtons
 
-avereward_Green = []
-avereward_Blue = []
-avereward_Red = []
+avereward_Green = [0]
+avereward_Blue = [0]
+avereward_Red = [0]
 
 def main():
     print("Multi-armed Bandit In-Class Project:\n"+
@@ -48,7 +48,7 @@ def main():
     for loop_num in range(100):
         val = -1
         reward = -1
-        if random.random() < e:
+        if random.random() > e:
             val = random.choice([1, 2, 3])
             if val == 1:
                 reward = np.random.choice(green)
