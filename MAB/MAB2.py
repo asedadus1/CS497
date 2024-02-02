@@ -36,19 +36,27 @@ def main():
         "  3. Display how estimated value of each treatment evolves over time.\n" +
         "  4. Display the average reward you have obtained evolves.")
 
-    print(f"      ___ G _____ B _____ R ___")
+    
     green = [4.77317728, 5.99791051, 5.76776377, 4.47913849, 6.21411927, 6.84915318, 8.44082357, 6.15266159, 6.97135381, 7.43452167]
     blue = [6.00449072, 3.34005839, 6.71096916, 4.11113061, 5.68416528, 3.88539945, 3.51181469, 3.67426432, 4.98069804, 4.41366311]
     red = [6.36086896, 5.65584783, 7.62912922, 13.29826146, 5.99876216, 8.14484021, 9.74488991, 6.616229, 14.26793535, 0.98932393]
 
     QBlue, QGreen, QRed = 0.0, 0.0, 0.0
     NBlue, NGreen, NRed = 0, 0, 0
-    e = 0.01  # epsilon default value
+    # e = 0.01  # epsilon default value
+    e = random.uniform(0, 1) # randomly selected epsilon default value
 
+    print(f"\nEpsilon: {e:.3f}\n")
+    
+    print(f"      ___ G _____ B _____ R ___")
+    
     for loop_num in range(100):
         val = -1
         reward = -1
-        if random.random() > e:
+        #e = random.uniform(0, 1)
+
+        # print(f"\nEpsilon: {e:.3f}\n")
+        if random.random() < e:
             val = random.choice([1, 2, 3])
             if val == 1:
                 reward = np.random.choice(green)
@@ -82,7 +90,7 @@ def main():
         else:
             QRed = QRed + (1/NRed)*(reward - QRed)
             avereward_Red.append(QRed)
-        print(f"Run {loop_num + 1}:   {QGreen:.1f}     {QBlue:.1f}     {QRed:.1f}   ")
+        print(f"Run {loop_num + 1}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}")        #Epsilon: {e:.2f}")
 
     print("\nBest treatment after all runs:", end=" ")
     if QGreen > QBlue and QGreen > QRed:
