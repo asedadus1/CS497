@@ -83,13 +83,18 @@ def main():
                 NRed += 1
         if val == 1:
             QGreen = QGreen + (1/NGreen)*(reward - QGreen)
-            avereward_Green.append(QGreen)
+            # avereward_Green.append(QGreen)
         elif val == 2:
             QBlue = QBlue + (1/NBlue)*(reward - QBlue)
-            avereward_Blue.append(QBlue)
+            # avereward_Blue.append(QBlue)
         else:
             QRed = QRed + (1/NRed)*(reward - QRed)
-            avereward_Red.append(QRed)
+            # avereward_Red.append(QRed)
+        
+        avereward_Green.append(QGreen)
+        avereward_Blue.append(QBlue)
+        avereward_Red.append(QRed)
+
         print(f"Run {loop_num + 1}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}")        #Epsilon: {e:.2f}")
 
     print("\nBest treatment after all runs:", end=" ")
