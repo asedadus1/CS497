@@ -27,6 +27,7 @@ from matplotlib.widgets import CheckButtons
 avereward_Green = [0]
 avereward_Blue = [0]
 avereward_Red = [0]
+total_average_reward = [0]
 
 def main():
     # set up of the compiler
@@ -109,12 +110,16 @@ def main():
             QRed = QRed + (1/NRed)*(reward - QRed)
             # avereward_Red.append(QRed)
         
+        # Calculate total average reward at each step
+        total_avg_reward = (NGreen * QGreen + NBlue * QBlue + NRed * QRed) / (NGreen + NBlue + NRed)
+        total_average_reward.append(total_avg_reward)
         # set those values as placeholders to use in the graph
         avereward_Green.append(QGreen)
         avereward_Blue.append(QBlue)
         avereward_Red.append(QRed)
 
-        print(f"Run {loop_num + 1}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}")        #Epsilon: {e:.2f}")
+        print(f"Run {loop_num + 1}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}       "
+              f"Total average reward {total_avg_reward:.2f} ")        #Epsilon: {e:.2f}")
 
     print("\nBest treatment after all runs:", end=" ")
     if QGreen > QBlue and QGreen > QRed:
@@ -141,6 +146,7 @@ def main():
     green_line, = ax1.plot(avereward_Green, label='Green', color='green')
     blue_line, = ax1.plot(avereward_Blue, label='Blue', color='blue')
     red_line, = ax1.plot(avereward_Red, label='Red', color='red')
+    total_avg_reward_line, = ax1.plot(total_average_reward, label='Total Average Reward', color='purple')
 
     # Adding labels and title
     ax1.set_xlabel('Run number per treatment')
@@ -151,8 +157,8 @@ def main():
 
     # Create CheckButtons
     ax2 = fig.add_subplot(gs[:, 1])
-    labels = ('Green', 'Blue', 'Red')
-    visibility = [green_line.get_visible(), blue_line.get_visible(), red_line.get_visible()]
+    labels = ('Green', 'Blue', 'Red', 'Average')
+    visibility = [green_line.get_visible(), blue_line.get_visible(), red_line.get_visible(), total_avg_reward_line.get_visible()]
     check_buttons = CheckButtons(ax2, labels, visibility)
 
     # function to label for the colors
@@ -163,6 +169,8 @@ def main():
             blue_line.set_visible(not blue_line.get_visible())
         elif label == 'Red':
             red_line.set_visible(not red_line.get_visible())
+        elif label == 'Average':
+            total_avg_reward_line.set_visible(not total_avg_reward_line.get_visible())
 
         # Redraw the plot to reflect the changes in visibility
         plt.draw()
