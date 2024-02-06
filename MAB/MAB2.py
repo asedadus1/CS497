@@ -30,7 +30,6 @@ avereward_Red = [0]
 total_average_reward = [0]
 
 def main():
-    # set up of the compiler
     print("Multi-armed Bandit In-Class Project:\n"+
         "Objectives:\n" +
         "  1. Three different treatments with uncertain performance, defined as welfare of a patient after the treatment.\n" +
@@ -38,52 +37,42 @@ def main():
         "  3. Display how estimated value of each treatment evolves over time.\n" +
         "  4. Display the average reward you have obtained evolves.")
 
-    # array for green treatment
-    green = [4.77317728, 5.99791051, 5.76776377, 4.47913849, 6.21411927, 6.84915318, 8.44082357, 
-             6.15266159, 6.97135381, 7.43452167]
-    # array for blue treatment
-    blue = [6.00449072, 3.34005839, 6.71096916, 4.11113061, 5.68416528, 3.88539945, 3.51181469, 
-            3.67426432, 4.98069804, 4.41366311]
-    # array for red treatment
-    red = [6.36086896, 5.65584783, 7.62912922, 13.29826146, 5.99876216, 8.14484021, 9.74488991, 
-           6.616229, 14.26793535, 0.98932393]
+    
+    green = [4.77317728, 5.99791051, 5.76776377, 4.47913849, 6.21411927, 6.84915318, 8.44082357, 6.15266159, 6.97135381, 7.43452167]
+    blue = [6.00449072, 3.34005839, 6.71096916, 4.11113061, 5.68416528, 3.88539945, 3.51181469, 3.67426432, 4.98069804, 4.41366311]
+    red = [6.36086896, 5.65584783, 7.62912922, 13.29826146, 5.99876216, 8.14484021, 9.74488991, 6.616229, 14.26793535, 0.98932393]
 
-    # set the estimates to 0
     QBlue, QGreen, QRed = 0.0, 0.0, 0.0
-
-    # set the size as the size for the color
     NBlue, NGreen, NRed = 0, 0, 0
-    # e = 0.01  # epsilon default value
-
-    # randomly selected epsilon default value
-    e = random.uniform(0, 1)
-
+    e = random.uniform(0, 1) # randomly selected epsilon default value
     print(f"\nEpsilon: {e:.3f}\n")
     
     print(f"      ___ G _____ B _____ R ___")
     
-    # begin the loop for the algorithm
+    #This for loop will loop 100 times to select a reward based on the randomly generated epsilon value
     for loop_num in range(100):
         val = -1
         reward = -1
-        #e = random.uniform(0, 1)
 
         # print(f"\nEpsilon: {e:.3f}\n")
-        # choose a random color (explore)
+        # if the  randomly generated value is less than e, randomly choose treatment 
         if random.random() < e:
             val = random.choice([1, 2, 3])
-            if val == 1: #green 
+            #if the choice is i randomly choose reward value from the given reward value
+            # val 1 is green treatment, val 2 is blue treatment, val 3 is red treatment
+            if val == 1:
                 reward = np.random.choice(green)
                 NGreen += 1
-            elif val == 2: #blue
+            elif val == 2:
                 reward = np.random.choice(blue)
                 NBlue += 1
-            else: #red
+            else:
                 reward = np.random.choice(red)
                 NRed += 1
-        # exploit (pull current-best action)
+        #if randomly chosen value is greater than e, take the greedy method to select the next reward
         else:
-            highest = max(QGreen, QBlue, QRed)
+            #take the maximum value from the average reward of all treatment
+            highest = max(QGreen, QBlue, QRed) 
             if highest == QGreen:
                 val = 1
                 reward = np.random.choice(green)
@@ -96,23 +85,14 @@ def main():
                 val = 3
                 reward = np.random.choice(red)
                 NRed += 1
-
-        # perform the equation for green
+        #calculate the average reward including the new reward
         if val == 1:
             QGreen = QGreen + (1/NGreen)*(reward - QGreen)
-            # avereward_Green.append(QGreen)
-        # perform the equation for blue
         elif val == 2:
             QBlue = QBlue + (1/NBlue)*(reward - QBlue)
-            # avereward_Blue.append(QBlue)
-        # perform the equation for red
         else:
             QRed = QRed + (1/NRed)*(reward - QRed)
-            # avereward_Red.append(QRed)
         
-        # Calculate total average reward at each step
-        total_avg_reward = (NGreen * QGreen + NBlue * QBlue + NRed * QRed) / (NGreen + NBlue + NRed)
-        total_average_reward.append(total_avg_reward)
         # set those values as placeholders to use in the graph
         avereward_Green.append(QGreen)
         avereward_Blue.append(QBlue)
@@ -132,7 +112,7 @@ def main():
         print('"Red"')
         best_color = "Red"
 
-    # Print the best average treatment after all runs
+        # Print the best average treatment after all runs
     best_average_treatment = max(QGreen, QBlue, QRed)
     print(f'Best average treatment after all runs: {best_average_treatment:.1f} ({best_color})')
 
@@ -140,7 +120,7 @@ def main():
     fig = plt.figure(figsize=(8, 6))
     gs = fig.add_gridspec(2, 2, width_ratios=[3, 1])
 
-    # Plotting the graph for all three colors
+    # Plotting the line graph
     ax1 = fig.add_subplot(gs[:, 0])
 
     green_line, = ax1.plot(avereward_Green, label='Green', color='green')
@@ -161,7 +141,6 @@ def main():
     visibility = [green_line.get_visible(), blue_line.get_visible(), red_line.get_visible(), total_avg_reward_line.get_visible()]
     check_buttons = CheckButtons(ax2, labels, visibility)
 
-    # function to label for the colors
     def func(label):
         if label == 'Green':
             green_line.set_visible(not green_line.get_visible())
