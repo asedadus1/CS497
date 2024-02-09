@@ -27,10 +27,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import CheckButtons
 
-avereward_Green = [0]
-avereward_Blue = [0]
-avereward_Red = [0]
-total_average_reward = [0]
+avereward_Green = []
+avereward_Blue = []
+avereward_Red = []
+total_average_reward = []
 
 def main():
     # set up of the compiler
@@ -52,7 +52,8 @@ def main():
            6.616229, 14.26793535, 0.98932393]
 
     # set the estimates to 0
-    QBlue, QGreen, QRed = max(blue), max(green), max(red)
+    # max_val = max(QBlue, QGreen, QRed) 
+    QBlue, QGreen, QRed = 15, 15, 15
 
     # set the size as the size for the color
     NBlue, NGreen, NRed = 0, 0, 0
@@ -73,37 +74,50 @@ def main():
         # reward = -1
 
         # Check if any color has not been visited yet
-        
-        # max_index = np.argmax([QGreen, QBlue, QRed]) + 1
-        # val = max_index
-        
+                
         # Update Q values based on UCB formula
         # min method
-        if QGreen <= QBlue and QGreen <= QRed:
-            val = 1
-        elif QBlue <= QGreen and QBlue <= QRed:
-            val = 2
+        if(QBlue == QGreen and QBlue == QRed and QGreen == QRed):
+            val = random.choice([1, 2, 3])
+            if val == 1: #green 
+                reward = np.random.choice(green)
+                NGreen += 1
+            elif val == 2: #blue
+                reward = np.random.choice(blue)
+                NBlue += 1
+            else: #red
+                reward = np.random.choice(red)
+                NRed += 1
         else:
-            val = 3
+            # Calculate Upper Confidence Bound (UCB) for each treatment
+            UCB_Green = QGreen + c * (math.sqrt(math.log(loop_num) / NGreen)) if NGreen > 0 else float('inf')
+            UCB_Blue = QBlue + c * (math.sqrt(math.log(loop_num) / NBlue)) if NBlue > 0 else float('inf')
+            UCB_Red = QRed + c * (math.sqrt(math.log(loop_num) / NRed)) if NRed > 0 else float('inf')
+
+            # Choose the treatment with the maximum UCB
+            val = np.argmax([UCB_Green, UCB_Blue, UCB_Red]) + 1
+
+            if val == 1:  # green
+                reward = np.random.choice(green)
+                NGreen += 1
+            elif val == 2:  # blue
+                reward = np.random.choice(blue)
+                NBlue += 1
+            else:  # red
+                reward = np.random.choice(red)
+                NRed += 1
 
         # max method
         # max_index = np.argmax([QGreen, QBlue, QRed]) + 1
         # val = max_index
 
-
         # Select the treatment with the smallest estimated value for the current run
         if val == 1:
-            reward = np.random.choice(green)
-            NGreen += 1
-            QGreen = QGreen + c * (math.sqrt(math.log(loop_num) / NGreen))
+            QGreen = QGreen + (1/NGreen)*(reward - QGreen)
         elif val == 2:
-            reward = np.random.choice(blue)
-            NBlue += 1
-            QBlue = QBlue + c * (math.sqrt(math.log(loop_num) / NBlue))
+            QBlue = QBlue + (1/NBlue)*(reward - QBlue)
         else:
-            reward = np.random.choice(red)
-            NRed += 1
-            QRed = QRed + c * (math.sqrt(math.log(loop_num) / NRed))
+            QRed = QRed + (1/NRed)*(reward - QRed)
 
         total_avg_reward = (NGreen * QGreen + NBlue * QBlue + NRed * QRed) / (NGreen + NBlue + NRed)
         total_average_reward.append(total_avg_reward)
@@ -113,7 +127,8 @@ def main():
 
         print(f"Run {loop_num}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}       "
               f"Total average reward {total_avg_reward:.2f}")
-        
+#=================================================
+
     print("\nBest treatment after all runs:", end=" ")
     if QGreen > QBlue and QGreen > QRed:
         print('"Green"')
