@@ -52,7 +52,7 @@ def main():
            6.616229, 14.26793535, 0.98932393]
 
     # set the estimates to 0
-    QBlue, QGreen, QRed = 0,0,0
+    QBlue, QGreen, QRed = max(blue), max(green), max(red)
 
     # set the size as the size for the color
     NBlue, NGreen, NRed = 0, 0, 0
