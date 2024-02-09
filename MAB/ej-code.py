@@ -52,7 +52,7 @@ def main():
            6.616229, 14.26793535, 0.98932393]
 
     # set the estimates to 0
-    QBlue, QGreen, QRed = 0.0, 0.0, 0.0
+    QBlue, QGreen, QRed = 0,0,0
 
     # set the size as the size for the color
     NBlue, NGreen, NRed = 0, 0, 0
@@ -61,10 +61,6 @@ def main():
     # randomly selected epsilon default value
     # e = random.uniform(0, 1)
 
-    # Initialize a flag for each color to track if it has been visited
-    visited_green = False
-    visited_blue = False
-    visited_red = False
     # set c as a constant
     c = 2
 
@@ -74,57 +70,40 @@ def main():
     
     # begin the loop for the algorithm
     for loop_num in range(1, 101):
-        # val = -1
-        reward = -1
+        # reward = -1
 
         # Check if any color has not been visited yet
-        if not visited_green or not visited_blue or not visited_red:
-            # Choose a color that has not been visited
-            if not visited_green:
-                val = 1
-                visited_green = True
-            elif not visited_blue:
-                val = 2
-                visited_blue = True
-            else:
-                val = 3
-                visited_red = True
-        else:
-            # Choose the action with the highest UCB value
-            # if max(QGreen, QBlue, QRed) == QGreen:
-            #     val = 1
-            # elif max(QGreen, QBlue, QRed) == QBlue:
-            #     val = 2
-            # else:
-            #     val = 3
-            max_index = np.argmax([QGreen, QBlue, QRed]) + 1
-            val = max_index
-
+        
+        # max_index = np.argmax([QGreen, QBlue, QRed]) + 1
+        # val = max_index
+        
         # Update Q values based on UCB formula
+        # min method
+        if QGreen <= QBlue and QGreen <= QRed:
+            val = 1
+        elif QBlue <= QGreen and QBlue <= QRed:
+            val = 2
+        else:
+            val = 3
+
+        # max method
+        # max_index = np.argmax([QGreen, QBlue, QRed]) + 1
+        # val = max_index
+
+
+        # Select the treatment with the smallest estimated value for the current run
         if val == 1:
             reward = np.random.choice(green)
-            # QGreen = QGreen + c * (math.sqrt(math.log(loop_num) / NGreen))
             NGreen += 1
-            if NGreen != 0:
-                QGreen = QGreen + c * (math.sqrt(math.log(loop_num) / NGreen))
-            # else:
-            #     QGreen = 0
+            QGreen = QGreen + c * (math.sqrt(math.log(loop_num) / NGreen))
         elif val == 2:
             reward = np.random.choice(blue)
-            # QBlue = QBlue + c * (math.sqrt(math.log(loop_num) / NBlue))
             NBlue += 1
-            if NBlue != 0:
-                QBlue = QBlue + c * (math.sqrt(math.log(loop_num) / NBlue))
-            # else:
-            #     QBlue = 0
+            QBlue = QBlue + c * (math.sqrt(math.log(loop_num) / NBlue))
         else:
             reward = np.random.choice(red)
-            # QRed = QRed + c * (math.sqrt(math.log(loop_num) / NRed))
             NRed += 1
-            if NRed != 0:
-                QRed = QRed + c * (math.sqrt(math.log(loop_num) / NRed))
-            # else:
-            #     QRed = 0
+            QRed = QRed + c * (math.sqrt(math.log(loop_num) / NRed))
 
         total_avg_reward = (NGreen * QGreen + NBlue * QBlue + NRed * QRed) / (NGreen + NBlue + NRed)
         total_average_reward.append(total_avg_reward)
@@ -132,7 +111,7 @@ def main():
         avereward_Blue.append(QBlue)
         avereward_Red.append(QRed)
 
-        print(f"Run {loop_num + 1}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}       "
+        print(f"Run {loop_num}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}       "
               f"Total average reward {total_avg_reward:.2f}")
         
     print("\nBest treatment after all runs:", end=" ")
