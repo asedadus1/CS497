@@ -70,13 +70,13 @@ def main():
             val = random.choice([1, 2, 3])
             if val == 1: #green 
                 reward = np.random.choice(green)
-                # NGreen += 1
+                NGreen += 1
             elif val == 2: #blue
                 reward = np.random.choice(blue)
-                # NBlue += 1
+                NBlue += 1
             else: #red
                 reward = np.random.choice(red)
-                # NRed += 1
+                NRed += 1
         else:
             #this will selcect the max from all the QBlue, QGreen, and QRed. and if there is to equal max,it will rendomly select from the remaing max
             max_value = max(UCB_Blue, UCB_Green, UCB_Red) 
