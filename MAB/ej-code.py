@@ -14,7 +14,7 @@
 #   - int NBlue, NGreen, NRed = 0, where N is used for the 
 #   - double R, where R is reward for the greedy number
 #   - double e = 0.01 where e is epsilon-greedy method
-#   - set the alph to be x between 0 < 1 
+#   - set the alpha to be x between 0 < 1 
 #       - the alpha determains how far back should we focuse 
 #   - loop from 1 to 100
 #   - Find the greedy action, find the action to take
@@ -25,7 +25,6 @@ import random
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import CheckButtons
 
 avereward_Green = []
 avereward_Blue = []
@@ -38,9 +37,8 @@ def main():
         "Objectives:\n" +
         "  1. Three different treatments with uncertain performance, defined as welfare of a patient after the treatment.\n" +
         "  2. Help doctor to prescribe a treatment at one time.\n" +
-        "  3. Display how estimated value of each treatment evolves over time.\n" +
-        "  4. Display the average reward you have obtained evolves.")
-
+        "  3. Display how the average reward change over time\n")
+   
     # array for green treatment
     green = [4.77317728, 5.99791051, 5.76776377, 4.47913849, 6.21411927, 6.84915318, 8.44082357, 
              6.15266159, 6.97135381, 7.43452167]
@@ -51,84 +49,76 @@ def main():
     red = [6.36086896, 5.65584783, 7.62912922, 13.29826146, 5.99876216, 8.14484021, 9.74488991, 
            6.616229, 14.26793535, 0.98932393]
 
-    # set the estimates to 0
-    # max_val = max(QBlue, QGreen, QRed) 
-    QBlue, QGreen, QRed = 15, 15, 15
-
-    # set the size as the size for the color
+    #set all the average reward to max
+    QBlue, QGreen, QRed = max(blue), max(green), max(red)
     NBlue, NGreen, NRed = 0, 0, 0
-    # e = 0.01  # epsilon default value
+    UCB_Blue, UCB_Green, UCB_Red = QBlue, QGreen, QRed
 
-    # randomly selected epsilon default value
-    # e = random.uniform(0, 1)
-
-    # set c as a constant
+    # constant c that will be used for the UCB
     c = 2
 
-    # print(f"\nEpsilon: {e:.3f}\n")
-    
-    print(f"      ___ G _____ B _____ R ___")
-    
+    print(f"      ____ G ______ B ______ R ______")
+
+    # average action for all three colors 
+    At = []
+
     # begin the loop for the algorithm
     for loop_num in range(1, 101):
+        # val = -1
         # reward = -1
-
-        # Check if any color has not been visited yet
-                
-        # Update Q values based on UCB formula
-        # min method
-        if(QBlue == QGreen and QBlue == QRed and QGreen == QRed):
+        if(UCB_Blue == UCB_Green and UCB_Blue == UCB_Red and UCB_Green == UCB_Red):
             val = random.choice([1, 2, 3])
             if val == 1: #green 
                 reward = np.random.choice(green)
-                NGreen += 1
+                # NGreen += 1
             elif val == 2: #blue
                 reward = np.random.choice(blue)
-                NBlue += 1
+                # NBlue += 1
             else: #red
                 reward = np.random.choice(red)
-                NRed += 1
+                # NRed += 1
         else:
-            # Calculate Upper Confidence Bound (UCB) for each treatment
-            UCB_Green = QGreen + c * (math.sqrt(math.log(loop_num) / NGreen)) if NGreen > 0 else float('inf')
-            UCB_Blue = QBlue + c * (math.sqrt(math.log(loop_num) / NBlue)) if NBlue > 0 else float('inf')
-            UCB_Red = QRed + c * (math.sqrt(math.log(loop_num) / NRed)) if NRed > 0 else float('inf')
-
-            # Choose the treatment with the maximum UCB
-            val = np.argmax([UCB_Green, UCB_Blue, UCB_Red]) + 1
-
-            if val == 1:  # green
+            #this will selcect the max from all the QBlue, QGreen, and QRed. and if there is to equal max,it will rendomly select from the remaing max
+            max_value = max(UCB_Blue, UCB_Green, UCB_Red) 
+            max_colors = [color for color, value in {'QBlue': UCB_Blue, 'QGreen': UCB_Green, 'QRed': UCB_Red}.items() if value == max_value]
+            selected_color = random.choice(max_colors)
+            if selected_color == 'QGreen':
+                val = 1
                 reward = np.random.choice(green)
                 NGreen += 1
-            elif val == 2:  # blue
+            elif selected_color == 'QBlue':
+                val = 2
                 reward = np.random.choice(blue)
                 NBlue += 1
-            else:  # red
+            elif selected_color == 'QRed':
+                val = 3
                 reward = np.random.choice(red)
                 NRed += 1
 
-        # max method
-        # max_index = np.argmax([QGreen, QBlue, QRed]) + 1
-        # val = max_index
-
-        # Select the treatment with the smallest estimated value for the current run
+        # perform the equation for green
         if val == 1:
             QGreen = QGreen + (1/NGreen)*(reward - QGreen)
+            UCB_Green = QGreen + c * (math.sqrt(math.log(loop_num) / NGreen))
+            At.append(UCB_Green)
+        # perform the equation for blue
         elif val == 2:
             QBlue = QBlue + (1/NBlue)*(reward - QBlue)
+            UCB_Blue = QBlue + c * (math.sqrt(math.log(loop_num) / NBlue))
+            At.append(UCB_Blue)
+        # perform the equation for red
         else:
             QRed = QRed + (1/NRed)*(reward - QRed)
+            UCB_Red = QRed + c * (math.sqrt(math.log(loop_num) / NRed))
+            At.append(UCB_Red)
 
+        # Calculate total average reward at each step
         total_avg_reward = (NGreen * QGreen + NBlue * QBlue + NRed * QRed) / (NGreen + NBlue + NRed)
         total_average_reward.append(total_avg_reward)
-        avereward_Green.append(QGreen)
-        avereward_Blue.append(QBlue)
-        avereward_Red.append(QRed)
 
-        print(f"Run {loop_num}:   {QGreen:.2f}     {QBlue:.2f}     {QRed:.2f}       "
-              f"Total average reward {total_avg_reward:.2f}")
-#=================================================
+        print(f"Run {loop_num}:   {UCB_Green:.2f}     {UCB_Blue:.2f}     {UCB_Red:.2f}       "
+              f"Total average reward {total_avg_reward:.2f} ")        #Epsilon: {e:.2f}")
 
+    # best treatment from all of the other colors
     print("\nBest treatment after all runs:", end=" ")
     if QGreen > QBlue and QGreen > QRed:
         print('"Green"')
@@ -143,46 +133,25 @@ def main():
     # Print the best average treatment after all runs
     best_average_treatment = max(QGreen, QBlue, QRed)
     print(f'Best average treatment after all runs: {best_average_treatment:.1f} ({best_color})')
-    
+
     fig = plt.figure(figsize=(8, 6))
     gs = fig.add_gridspec(2, 2, width_ratios=[3, 1])
 
     # Plotting the graph for all three colors
     ax1 = fig.add_subplot(gs[:, 0])
 
-    green_line, = ax1.plot(avereward_Green, label='Green', color='green')
-    blue_line, = ax1.plot(avereward_Blue, label='Blue', color='blue')
-    red_line, = ax1.plot(avereward_Red, label='Red', color='red')
-    total_avg_reward_line, = ax1.plot(total_average_reward, label='Total Average Reward', color='purple')
+    # action average slope
+    At, = ax1.plot(total_average_reward, label='Total Average Reward', color='purple')
 
     # Adding labels and title
     ax1.set_xlabel('Run number per treatment')
     ax1.set_ylabel('Avarage Reward Value per treatment')
     ax1.set_title('Line Graph with Index as X-axis')
 
+    ax1.set_ylim(0, max(total_average_reward) + 1)
+
     ax1.legend(loc='upper right')
 
-    # Create CheckButtons
-    ax2 = fig.add_subplot(gs[:, 1])
-    labels = ('Green', 'Blue', 'Red', 'Average')
-    visibility = [green_line.get_visible(), blue_line.get_visible(), red_line.get_visible(), total_avg_reward_line.get_visible()]
-    check_buttons = CheckButtons(ax2, labels, visibility)
-
-    # function to label for the colors
-    def func(label):
-        if label == 'Green':
-            green_line.set_visible(not green_line.get_visible())
-        elif label == 'Blue':
-            blue_line.set_visible(not blue_line.get_visible())
-        elif label == 'Red':
-            red_line.set_visible(not red_line.get_visible())
-        elif label == 'Average':
-            total_avg_reward_line.set_visible(not total_avg_reward_line.get_visible())
-
-        # Redraw the plot to reflect the changes in visibility
-        plt.draw()
-
-    check_buttons.on_clicked(func)
     plt.tight_layout()
 
     # Display the plot
