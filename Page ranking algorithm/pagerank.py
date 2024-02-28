@@ -1,88 +1,119 @@
-import array
-import heapq
-
-class MaxHeap:
+class Graph:
     def __init__(self):
-        self.heap = []
+        # Initialize the graph with empty sets and dictionaries to be used in other functions
+        self.nodes = set()
+        self.edges = {}
+        self.page_ranks = {}
 
-    def push(self, value, char):
-        heapq.heappush(self.heap, (-value, char))  # Use negative value to simulate max heap
+    def add_edge(self, start_point, end_point):
+        # Add an edge that will be used in the main, using start to end points
+        self.nodes.add(start_point)
+        self.nodes.add(end_point)
 
-    def pop(self):
-        return heapq.heappop(self.heap)[::-1]  # Return tuple with original order
+        # Use this for a new start point
+        if start_point not in self.edges:
+            self.edges[start_point] = []
+        self.edges[start_point].append(end_point)
 
-    def peek(self):
-        if self.heap:
-            return self.heap[0][::-1]
-        return None
+    ############# STEP 1 #############
+    def handle_sinks(self):
+        # used to see any nodes that do not have any edges going to different nodes
+        # another condensed version to store the sinks to save space
+        sinks = [vertex for vertex in self.nodes if vertex not in self.edges]
 
-    def __len__(self):
-        return len(self.heap)
+        # Connect sinks to all existing nodes
+        for sink in sinks:
+            for existing_node in self.nodes:
+                if existing_node:
+                    self.add_edge(sink, existing_node)
 
-    def __str__(self):
-        return str([(-value, char) for value, char in self.heap])
-
-def main():
-    # Add nodes
-    nodes = ['A', 'B', 'C', 'D']
-    # Add edges
-    edges = [('B', 'A'), ('B', 'C'), ('C', 'A'), ('D', 'A')]
+        return sinks
     
-    #empty set to store node that have an outgoing edges
-    nodes_with_outgoing_edges = set()
-    #this will store the number of outbound edges each node it have
-    outbound_edges_count = [0] * len(nodes)
-
-    #this loop will count how many out going linkes are in the graph
-    for edge in edges:
-        nodes_with_outgoing_edges.add(edge[0])
-        sorce_node = edge[0]
-        sorce_node_index = nodes.index(sorce_node)
-        outbound_edges_count[sorce_node_index] += 1
-    #print(outbound_edges_count)
-
-
-
-    sink_nodes = []
-    #this loop will look for skinking nodes
-    for i in range(len(outbound_edges_count)):
-        if outbound_edges_count[i] == 0:
-            sink_nodes.append(nodes[i])
-
-
-
-    for sink_node in sink_nodes:
-        for node in nodes:
-            edges.append((sink_node, node))
-
-    outbound_edges_count = [0] * len(nodes)
-    for edge in edges:
-        nodes_with_outgoing_edges.add(edge[0])
-        sorce_node = edge[0]
-        sorce_node_index = nodes.index(sorce_node)
-        outbound_edges_count[sorce_node_index] += 1
+    def outgoing_links(self, vertex):
+        # opposite of sinks, finding nodes that have edges to other nodes
+        return self.edges.get(vertex, [])
     
-    #print(outbound_edges_count)
+    ############# STEP 3 #############
+    def init_page_ranks(self):
+        # initialize page ranks 
+        n = len(self.nodes)
+        init_rank = (1 / n)
+        for vertex in self.nodes:
+            if vertex in self.edges:
+            # assign into the page_ranks dict to store the init_rank
+                self.page_ranks[vertex] = init_rank
+            # else:
+            #     # Assign a small initial value to sinks
+            #     self.page_ranks[vertex] = 0.001
+    
+    ############# STEP 4 #############
+    def calculate_page_ranks(self, d, 𝜀):
+        n = len(self.nodes)
 
+        # loop through the converging to check the iterations and margin of error
+        for _ in range(100):
+            prev_ranks = self.page_ranks.copy()
 
+            # loop through the list of nodes
+            for vertex in self.nodes:
+                incoming_links = [v for v in self.nodes if vertex in self.edges.get(v, [])]
+                # equation
+                self.page_ranks[vertex] = (1 - d) / n + d * sum(prev_ranks[v] / len(self.edges.get(v, [])) for v in incoming_links)
 
-    N = len(nodes)
+            # Check convergence
+            convergence = all(abs(self.page_ranks[v] - prev_ranks[v]) < 𝜀 for v in self.nodes)
+            if convergence:
+                print("\nMargin of error < epsilon after iteration", _)
+                break
+
+        # Normalize page ranks to ensure they add up to 1
+        total_rank_sum = sum(self.page_ranks.values())
+        for vertex in self.nodes:
+            self.page_ranks[vertex] /= total_rank_sum
+
+    ############# Final Output #############
+    def print_final_ranks(self):
+        # Print the final ranks based in alphabetical order
+        for vertex, rank in sorted(self.page_ranks.items()):
+            print(f"Page {vertex}: Rank {rank:.3f}")  
+
+def PageRank(graph):
+    # Step 1: Find out sinks, add outgoing links
+    sinks = graph.handle_sinks()
+    
+    # outgoing_links = {vertex: graph.outgoing_links(vertex) for vertex in graph.nodes}
+    outgoing_links = {}
+    for vertex in graph.nodes:
+        outgoing_links[vertex] = graph.outgoing_links(vertex)
+
+    print("################## Sinks ##################\n")
+    print(sinks)
+
+    print("\n################## Outgoing Links ##################\n")
+    for vertex, links in sorted(outgoing_links.items()):
+        print(f"Page {vertex}: {links}")
+
+    # Step 2: Set damping factor (e.g., 𝑑 = 0.85 and 𝜀 = 0.01)
     d = 0.85
-    epsilon = 0.01
+    𝜀 = 0.01
 
-    page_rank = MaxHeap()
-    val = 1 / len(nodes)  # Calculate the initial PageRank value (1/N)
-    # Push initial PageRank value for each node into the MaxHeap
-    for node in nodes:
-        page_rank.push(val, node)
+    # Step 3: Initialize all ranks to be 1/𝑁
+    graph.init_page_ranks()
 
-    #print(page_rank)
+    # Step 4: Calculate PageRank of each page repetitively based on the equation, converging, as well as total ranks
+    graph.calculate_page_ranks(d, 𝜀)
 
-    loop_num = 1
-    margin_or_error = 1
-    while loop_num < 101 and  margin_or_error < epsilon:
-        break
+    print("\n################## Final Ranks ##################\n")
+    # Print the final ranks
+    graph.print_final_ranks()
 
 
 if __name__ == "__main__":
-    main()
+    graph = Graph()
+    # In-class Projects --- Page Rank Algorithm (Slide 11)
+    graph.add_edge("C", "A")
+    graph.add_edge("D", "A")
+    graph.add_edge("B", "A")
+    graph.add_edge("B", "C")
+
+    PageRank(graph)
