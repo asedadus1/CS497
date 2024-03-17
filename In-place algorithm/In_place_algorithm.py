@@ -1,6 +1,10 @@
 import numpy as np
 
-
+#grid passed the matrix argument
+#g = gama value
+#i = row length
+#m = col length
+#theta = change in value from the old matrix value to new matrix value
 def dp_matrix(grid, g ,i, m, theta):
     while(True):
         max_change = 0
